@@ -121,13 +121,20 @@ resource "digitalocean_droplet" "sidechain" {
       "pushd sidechain",
       "docker-compose -f docker/sidechain.yml up -d"
     ]
+
+    connection = {
+      type        = "ssh"
+      user        = "root"
+      private_key = "${file("${var.private_key_path}")}"
+      agent       = false
+    }
   }
 }
 
 # TODO: a single droplet for everything but the SSH hop. we should decompose this.
-resource "digitalocean_droplet" "relay-one" {
+resource "digitalocean_droplet" "relay-1" {
   image    = "docker"
-  name     = "relay_1"
+  name     = "relay-1"
   region   = "${var.region}"
   size     = "s-1vcpu-2gb"
   ssh_keys = ["${digitalocean_ssh_key.default.id}"]
@@ -145,7 +152,35 @@ resource "digitalocean_droplet" "relay-one" {
     }
   }
 
-  provisioner "remote-exec" {}
+  provisioner "file" {
+    source      = "./relay/1"
+    destination = "/root/relay"
+
+    connection = {
+      type        = "ssh"
+      user        = "root"
+      private_key = "${file("${var.private_key_path}")}"
+      agent       = false
+    }
+  }
+
+  provisioner "remove-exec" {
+    inline = [
+      "curl -L https://github.com/docker/compose/releases/download/1.18.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose",
+      "chmod +x /usr/local/bin/docker-compose",
+      "ENODE=$(bootnode --nodekey --writeaddress)",
+      "ENODE_IP=${digitalocean_droplet.bootnode.ipv4_address}",
+      "pushd relay",
+      "docker-compose -f docker/relay.yml up -d"
+    ]
+
+    connection = {
+      type        = "ssh"
+      user        = "root"
+      private_key = "${file("${var.private_key_path}")}"
+      agent       = false
+    }
+  }
 }
 
 # NOTE: effectively treat protocol and port_range as required due to bugs in DO's API
@@ -246,13 +281,6 @@ resource "digitalocean_record" "bootnode" {
   type   = "A"
   name   = "bootnode"
   value  = "${digitalocean_floating_ip.bootnode.ip_address}"
-}
-
-resource "digitalocean_record" "geth" {
-  domain = "polyswarm.network"
-  type   = "A"
-  name   = "geth"
-  value  = "${digitalocean_floating_ip.geth.ip_address}"
 }
 
 output "ip-bootnode" {
