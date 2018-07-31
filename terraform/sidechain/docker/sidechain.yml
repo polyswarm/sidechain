@@ -1,0 +1,37 @@
+version: '3'
+services:
+    sidechain:
+        build:
+            context: ../sidechain
+        command: ["--bootnodes", "enode://${ENODE}@[${ENODE_IP}]", "--syncmode", "full", "--networkid", "31337", "--gasprice", "0", "--targetgaslimit", "94000000", "--nodiscover", "--rpc", "--rpcaddr", "0.0.0.0", "--rpcvhosts", "localhost,sidechain", "--rpcapi", "eth,web3,personal,net", "--ws", "--wsaddr", "0.0.0.0", "--wsapi", "eth,web3,personal,net", "--wsorigins", "*", "--etherbase", "0xb8a26662fc7fa93e8d525f6e9d8c90fcdb467aa1", "--unlock", "0xb8a26662fc7fa93e8d525f6e9d8c90fcdb467aa1", "--password", "password.txt"]
+        depends_on:
+            - sidechain-sealer0
+            - sidechain-sealer1
+            - sidechain-sealer2
+        networks:
+            sidechain:
+                ipv4_address: 172.20.1.100
+        ports:
+            - 8545:8545
+            - 8546:8546
+    sidechain-sealer0:
+        build:
+            context: ../sidechain
+        command: ["--bootnodes", "enode://${ENODE}@[${ENODE_IP}]", "--syncmode", "full", "--networkid", "31337", "--gasprice", "0", "--targetgaslimit", "94000000", "--nodekey", "nodekeys/sidechain-sealer0", "--nodiscover", "--etherbase", "0x84b97f4ddddca458058d6047f6bb53672e76ada9", "--unlock", "0x84b97f4ddddca458058d6047f6bb53672e76ada9", "--password", "password.txt", "--mine"]
+        networks:
+            sidechain:
+                ipv4_address: 172.20.1.101
+    sidechain-sealer1:
+        build:
+            context: ../sidechain
+        command: ["--bootnodes", "enode://${ENODE}@[${ENODE_IP}]", "--syncmode", "full", "--networkid", "31337", "--gasprice", "0", "--targetgaslimit", "94000000", "--nodekey", "nodekeys/sidechain-sealer1", "--nodiscover", "--etherbase", "0x8caa3ee0f36ef860e26fd4aa104998b85f0583f3", "--unlock", "0x8caa3ee0f36ef860e26fd4aa104998b85f0583f3", "--password", "password.txt", "--mine"]
+        networks:
+            sidechain:
+                ipv4_address: 172.20.1.102
+    sidechain-sealer2:
+        build:
+            context: ../sidechain
+        command: ["--bootnodes", "enode://${ENODE}@[${ENODE_IP}]", "--syncmode", "full", "--networkid", "31337", "--gasprice", "0", "--targetgaslimit", "94000000", "--nodekey", "nodekeys/sidechain-sealer2", "--nodiscover", "--etherbase", "0xa36e96217089ea4079d3eb39346f582c5566dec5", "--unlock", "0xa36e96217089ea4079d3eb39346f582c5566dec5", "--password", "password.txt", "--mine"]
+        networks:
+            sidechain:
+                ipv4_address: 172.20.1.103

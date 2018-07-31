@@ -1,4 +1,4 @@
-from geth
+from ethereum/client-go:alltools-release-1.8
 
 copy ./nodekey /nodekey
 

@@ -56,7 +56,7 @@ resource "digitalocean_droplet" "bootnode" {
       "curl -L https://github.com/docker/compose/releases/download/1.18.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose",
       "chmod +x /usr/local/bin/docker-compose",
       "pushd /root/bootnode",
-      "docker-compose -f ./docker/bootnode.yml up -d",
+      "docker-compose -f docker/bootnode.yml up -d",
     ]
 
     connection = {
@@ -76,21 +76,9 @@ resource "digitalocean_droplet" "sidechain" {
   ssh_keys = ["${digitalocean_ssh_key.default.id}"]
   tags     = ["${digitalocean_tag.geth.id}"]
 
-  provisioner "remote-exec" {
-    # Confirm user is added before adding the key
-    script = "./scripts/install_geth.sh"
-
-    connection = {
-      type        = "ssh"
-      user        = "root"
-      private_key = "${file("${var.private_key_path}")}"
-      agent       = false
-    }
-  }
-
   provisioner "file" {
-    source      = "./geth"
-    destination = "/root/geth"
+    source      = "./sidechain"
+    destination = "/root/sidechain"
 
     connection = {
       type        = "ssh"
@@ -113,8 +101,8 @@ resource "digitalocean_droplet" "sidechain" {
   }
 
   provisioner "file" {
-    source      = "./keystore"
-    destination = "/root/.ethereum/keystores"
+    source      = "./sidechain"
+    destination = "/root/sidechain"
 
     connection = {
       type        = "ssh"
@@ -126,9 +114,12 @@ resource "digitalocean_droplet" "sidechain" {
 
   provisioner "remove-exec" {
     inline = [
-      "bootnode --nodekey --writeaddress > /root/address",
-      "geth init --datadir /root/.ethereum/root/geth/",
-      "geth --datadir /root/.ethereum/root/geth --networkid 31337 --no-discover --bootnodes enode://$(cat /root/bootnode/nodekey)[${digitalocean_droplet.bootnode.ipv4_address}] --unlock 4b0fce364ee5491d9bea21eabf23aef020c39ee9 --mine --password /root/geth/password.txt",
+      "curl -L https://github.com/docker/compose/releases/download/1.18.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose",
+      "chmod +x /usr/local/bin/docker-compose",
+      "ENODE=$(bootnode --nodekey --writeaddress)",
+      "ENODE_IP=${digitalocean_droplet.bootnode.ipv4_address}",
+      "pushd sidechain",
+      "docker-compose -f docker/sidechain.yml up -d"
     ]
   }
 }
