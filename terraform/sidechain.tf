@@ -51,9 +51,9 @@ resource "digitalocean_droplet" "bootnode" {
   }
 }
 
-resource "digitalocean_droplet" "sidechain" {
+resource "digitalocean_droplet" "sealer1" {
   image    = "docker"
-  name     = "sidechain"
+  name     = "sealer1"
   region   = "${var.region}"
   size     = "s-2vcpu-4gb"
   ssh_keys = ["${digitalocean_ssh_key.default.id}"]
@@ -85,12 +85,105 @@ resource "digitalocean_droplet" "sidechain" {
 
   provisioner "remote-exec" {
     inline = [
-      "curl -L https://github.com/docker/compose/releases/download/1.18.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose",
-      "chmod +x /usr/local/bin/docker-compose",
       "cd sidechain",
-      "echo ENODE=$(cat /root/bootnode/enode) > .env",
-      "echo ENODE_IP=${digitalocean_droplet.bootnode.ipv4_address} >> .env",
-      "docker-compose -f docker/sidechain.yml up -d"
+      "chmod +x create_sealer.sh",
+      "./create_sealer.sh ${digitalocean_droplet.bootnode.ipv4_address} 0x84b97f4ddddca458058d6047f6bb53672e76ada9"
+    ]
+
+    connection = {
+      type        = "ssh"
+      user        = "root"
+      private_key = "${file("${var.private_key_path}")}"
+      agent       = false
+    }
+  }
+}
+
+resource "digitalocean_droplet" "sealer2" {
+  image    = "docker"
+  name     = "sealer2"
+  region   = "${var.region}"
+  size     = "s-2vcpu-4gb"
+  ssh_keys = ["${digitalocean_ssh_key.default.id}"]
+  tags     = ["${digitalocean_tag.sidechain.id}"]
+
+  provisioner "file" {
+    source      = "../bootnode"
+    destination = "/root/bootnode"
+
+    connection = {
+      type        = "ssh"
+      user        = "root"
+      private_key = "${file("${var.private_key_path}")}"
+      agent       = false
+    }
+  }
+
+  provisioner "file" {
+    source      = "../sidechain"
+    destination = "/root/sidechain"
+
+    connection = {
+      type        = "ssh"
+      user        = "root"
+      private_key = "${file("${var.private_key_path}")}"
+      agent       = false
+    }
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "cd sidechain",
+      "chmod +x create_sealer.sh",
+      "./create_sealer.sh ${digitalocean_droplet.bootnode.ipv4_address} 0x8caa3ee0f36ef860e26fd4aa104998b85f0583f3"
+    ]
+
+    connection = {
+      type        = "ssh"
+      user        = "root"
+      private_key = "${file("${var.private_key_path}")}"
+      agent       = false
+    }
+  }
+}
+
+resource "digitalocean_droplet" "sealer3" {
+  image    = "docker"
+  name     = "sealer3"
+  region   = "${var.region}"
+  size     = "s-2vcpu-4gb"
+  ssh_keys = ["${digitalocean_ssh_key.default.id}"]
+  tags     = ["${digitalocean_tag.sidechain.id}"]
+
+  provisioner "file" {
+    source      = "../bootnode"
+    destination = "/root/bootnode"
+
+    connection = {
+      type        = "ssh"
+      user        = "root"
+      private_key = "${file("${var.private_key_path}")}"
+      agent       = false
+    }
+  }
+
+  provisioner "file" {
+    source      = "../sidechain"
+    destination = "/root/sidechain"
+
+    connection = {
+      type        = "ssh"
+      user        = "root"
+      private_key = "${file("${var.private_key_path}")}"
+      agent       = false
+    }
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "cd sidechain",
+      "chmod +x create_sealer.sh",
+      "./create_sealer.sh ${digitalocean_droplet.bootnode.ipv4_address} 0xa36e96217089ea4079d3eb39346f582c5566dec5"
     ]
 
     connection = {
@@ -257,11 +350,3 @@ resource "digitalocean_record" "bootnode" {
 output "ip-bootnode" {
   value = "${digitalocean_droplet.bootnode.ipv4_address}"
 }
-
-output "ip-geth" {
-  value = "${digitalocean_droplet.sidechain.ipv4_address}"
-}
-
-# output "ip-relay" {
-#   value = "${digitalocean_droplet.relay_one.ipv4_address}"
-# }
