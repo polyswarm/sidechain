@@ -5,7 +5,7 @@ services:
             context: /root/sidechain
             dockerfile: /root/sidechain/docker/Dockerfile
         image: polyswarm/sidechain
-        command: ["--bootnodes", "enode://${ENODE}@${ENODE_IP}:30301", "--syncmode", "full", "--networkid", "31337", "--gasprice", "0", "--targetgaslimit", "94000000", "--nodiscover", "--etherbase", "0x4b0fce364ee5491d9bea21eabf23aef020c39ee9", "--unlock", "0x4b0fce364ee5491d9bea21eabf23aef020c39ee9", "--password", "password.txt"]
+        command: ["--bootnodes", "enode://${ENODE}@${ENODE_IP}:30301", "--syncmode", "full", "--networkid", "31337", "--gasprice", "0", "--targetgaslimit", "94000000","--etherbase", "0x4b0fce364ee5491d9bea21eabf23aef020c39ee9", "--unlock", "0x4b0fce364ee5491d9bea21eabf23aef020c39ee9", "--password", "password.txt"]
         depends_on:
             - sidechain-sealer0
             - sidechain-sealer1
@@ -18,16 +18,16 @@ services:
             context: /root/sidechain
             dockerfile: /root/sidechain/docker/Dockerfile
         image: polyswarm/sealer0
-        command: ["--bootnodes", "enode://${ENODE}@${ENODE_IP}:30301", "--syncmode", "full", "--networkid", "31337", "--gasprice", "0", "--targetgaslimit", "94000000", "--nodiscover", "--etherbase", "0x84b97f4ddddca458058d6047f6bb53672e76ada9", "--unlock", "0x84b97f4ddddca458058d6047f6bb53672e76ada9", "--password", "password.txt", "--mine"]
+        command: ["--bootnodes", "enode://${ENODE}@${ENODE_IP}:30301", "--syncmode", "full", "--networkid", "31337", "--gasprice", "0", "--targetgaslimit", "94000000", "--etherbase", "0x84b97f4ddddca458058d6047f6bb53672e76ada9", "--unlock", "0x84b97f4ddddca458058d6047f6bb53672e76ada9", "--password", "password.txt", "--mine"]
     sidechain-sealer1:
         build:
             context: /root/sidechain
             dockerfile: /root/sidechain/docker/Dockerfile
         image: polyswarm/sealer1
-        command: ["--bootnodes", "enode://${ENODE}@${ENODE_IP}:30301", "--syncmode", "full", "--networkid", "31337", "--gasprice", "0", "--targetgaslimit", "94000000", "--nodiscover", "--etherbase", "0x8caa3ee0f36ef860e26fd4aa104998b85f0583f3", "--unlock", "0x8caa3ee0f36ef860e26fd4aa104998b85f0583f3", "--password", "password.txt", "--mine"]
+        command: ["--bootnodes", "enode://${ENODE}@${ENODE_IP}:30301", "--syncmode", "full", "--networkid", "31337", "--gasprice", "0", "--targetgaslimit", "94000000", "--etherbase", "0x8caa3ee0f36ef860e26fd4aa104998b85f0583f3", "--unlock", "0x8caa3ee0f36ef860e26fd4aa104998b85f0583f3", "--password", "password.txt", "--mine"]
     sidechain-sealer2:
         build:
             context: /root/sidechain
             dockerfile: /root/sidechain/docker/Dockerfile
         image: polyswarm/sealer2
-        command: ["--bootnodes", "enode://${ENODE}@${ENODE_IP}:30301", "--syncmode", "full", "--networkid", "31337", "--gasprice", "0", "--targetgaslimit", "94000000", "--nodiscover", "--etherbase", "0xa36e96217089ea4079d3eb39346f582c5566dec5", "--unlock", "0xa36e96217089ea4079d3eb39346f582c5566dec5", "--password", "password.txt", "--mine"]
+        command: ["--bootnodes", "enode://${ENODE}@${ENODE_IP}:30301", "--syncmode", "full", "--networkid", "31337", "--gasprice", "0", "--targetgaslimit", "94000000", "--etherbase", "0xa36e96217089ea4079d3eb39346f582c5566dec5", "--unlock", "0xa36e96217089ea4079d3eb39346f582c5566dec5", "--password", "password.txt", "--mine"]
