@@ -375,14 +375,14 @@ resource "digitalocean_droplet" "relay3" {
 # All of these should be accessible only by geth or ssh
 resource "digitalocean_firewall" "sidechain" {
   name = "sidechain"
-  tags = [
+  droplet_ids = [
     "${digitalocean_droplet.relay1.id}",
     "${digitalocean_droplet.relay2.id}",
     "${digitalocean_droplet.relay3.id}",
     "${digitalocean_droplet.bootnode.id}",
     "${digitalocean_droplet.sealer1.id}",
     "${digitalocean_droplet.sealer2.id}",
-    "${digitalocean_droplet.sealer23.id}"
+    "${digitalocean_droplet.sealer3.id}"
   ]
 
   # permit inbound from hive-internal and hive-ssh-hop
