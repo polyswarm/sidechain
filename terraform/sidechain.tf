@@ -329,150 +329,63 @@ resource "digitalocean_droplet" "relay3" {
     }
   }
 }
-# TODO: a single droplet for everything but the SSH hop. we should decompose this.
-# resource "digitalocean_droplet" "relay-1" {
-#   image    = "docker"
-#   name     = "relay-1"
-#   region   = "${var.region}"
-#   size     = "s-1vcpu-2gb"
-#   ssh_keys = ["${digitalocean_ssh_key.default.id}"]
-#   tags     = ["${digitalocean_tag.relays.id}"]
 
-#   provisioner "file" {
-#     source      = "../bootnode"
-#     destination = "/root/bootnode"
+# All of these should be accessible only by geth or ssh
+resource "digitalocean_firewall" "sidechain" {
+  name = "sidechain"
+  tags = [
+    "${digitalocean_droplet.relay1.id}",
+    "${digitalocean_droplet.relay2.id}",
+    "${digitalocean_droplet.relay3.id}",
+    "${digitalocean_droplet.bootnode.id}",
+    "${digitalocean_droplet.sealer1.id}",
+    "${digitalocean_droplet.sealer2.id}",
+    "${digitalocean_droplet.sealer23.id}"
+  ]
 
-#     connection = {
-#       type        = "ssh"
-#       user        = "root"
-#       private_key = "${file("${var.private_key_path}")}"
-#       agent       = false
-#     }
-#   }
+  # permit inbound from hive-internal and hive-ssh-hop
+  inbound_rule = [
+    {
+      protocol    = "tcp"
+      port_range  = "22"]
+    },
+    {
+      protocol    = "tcp"
+      port_range  = "30301"
+    },
+    {
+      protocol    = "tcp"
+      port_range  = "30303"
+    },
+    {
+      protocol    = "udp"
+      port_range  = "30301"
+    },
+    {
+      protocol    = "udp"
+      port_range  = "30303"
+    },
+  ]
 
-#   provisioner "file" {
-#     source      = "./relay/1"
-#     destination = "/root/relay"
-
-#     connection = {
-#       type        = "ssh"
-#       user        = "root"
-#       private_key = "${file("${var.private_key_path}")}"
-#       agent       = false
-#     }
-#   }
-
-#   provisioner "remove-exec" {
-#     inline = [
-#       "curl -L https://github.com/docker/compose/releases/download/1.18.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose",
-#       "chmod +x /usr/local/bin/docker-compose",
-#       "ENODE=$(bootnode --nodekey --writeaddress)",
-#       "ENODE_IP=${digitalocean_droplet.bootnode.ipv4_address}",
-#       "pushd relay",
-#       "docker-compose -f docker/relay.yml up -d"
-#     ]
-
-#     connection = {
-#       type        = "ssh"
-#       user        = "root"
-#       private_key = "${file("${var.private_key_path}")}"
-#       agent       = false
-#     }
-#   }
-# }
-
-# # NOTE: effectively treat protocol and port_range as required due to bugs in DO's API
-# resource "digitalocean_firewall" "hive-internal" {
-#   # permit comms among "hive-ssh-hop" and "hive-internal" groups
-
-#   name = "hive-internal-only"
-
-#   droplet_ids = ["${digitalocean_droplet.meta.id}"]
-
-#   # permit inbound from hive-internal and hive-ssh-hop
-#   inbound_rule = [
-#     {
-#       protocol    = "tcp"
-#       port_range  = "22"
-#       source_tags = ["hive-internal", "hive-ssh-hop"]
-#     },
-#     {
-#       protocol    = "tcp"
-#       port_range  = "31337"
-#       source_tags = ["hive-internal", "hive-ssh-hop"]
-#     },
-#     {
-#       protocol    = "tcp"
-#       port_range  = "1-65535"
-#       source_tags = ["hive-internal"]
-#     },
-#   ]
-
-#   # permit outbound to hive-internal
-#   outbound_rule = [
-#     {
-#       protocol         = "tcp"
-#       port_range       = "1-65535"
-#       destination_tags = ["hive-internal"]
-#     },
-#     {
-#       protocol         = "udp"
-#       port_range       = "1-65535"
-#       destination_tags = ["hive-internal"]
-#     },
-#   ]
-# }
-
-# resource "digitalocean_firewall" "hive-ssh-hop" {
-#   name        = "only-ssh-in-dns-out"
-#   droplet_ids = ["${digitalocean_droplet.ssh-hop.id}"]
-
-#   # permit inbound SSH from *
-#   inbound_rule = [
-#     {
-#       protocol         = "tcp"
-#       port_range       = "${var.port-ssh}"
-#       source_addresses = ["0.0.0.0/0"]
-#     },
-#   ]
-
-#   # permit outbound DNS to * (TODO: do we need this)add
-#   # permit outbound all to hive-internal
-#   outbound_rule = [
-#     {
-#       protocol              = "tcp"
-#       port_range            = "${var.port-dns}"
-#       destination_addresses = ["0.0.0.0/0"]
-#     },
-#     {
-#       protocol              = "udp"
-#       port_range            = "${var.port-dns}"
-#       destination_addresses = ["0.0.0.0/0"]
-#     },
-#     {
-#       # permit all outbound to "hive-internal" (not other ssh hops)
-#       protocol         = "tcp"
-#       port_range       = "1-65535"
-#       destination_tags = ["hive-internal"]
-#     },
-#     {
-#       protocol         = "udp"
-#       port_range       = "1-65535"
-#       destination_tags = ["hive-internal"]
-#     },
-#     {
-#       # permit all outbound to "hive-internal" (not other ssh hops)
-#       protocol              = "tcp"
-#       port_range            = "1-65535"
-#       destination_addresses = ["${digitalocean_floating_ip.meta.ip_address}"]
-#     },
-#     {
-#       protocol              = "udp"
-#       port_range            = "1-65535"
-#       destination_addresses = ["${digitalocean_floating_ip.meta.ip_address}"]
-#     },
-#   ]
-# }
+  outbound_rule = [
+    {
+      protocol    = "tcp"
+      port_range  = "30301"
+    },
+    {
+      protocol    = "tcp"
+      port_range  = "30303"
+    },
+    {
+      protocol    = "udp"
+      port_range  = "30301"
+    },
+    {
+      protocol    = "udp"
+      port_range  = "30303"
+    },
+  ]
+}
 
 resource "digitalocean_record" "bootnode" {
   domain = "polyswarm.network"
