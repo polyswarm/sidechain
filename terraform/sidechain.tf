@@ -389,7 +389,7 @@ resource "digitalocean_firewall" "sidechain" {
   inbound_rule = [
     {
       protocol    = "tcp"
-      port_range  = "22"]
+      port_range  = "22"
     },
     {
       protocol    = "tcp"
