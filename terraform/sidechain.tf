@@ -206,10 +206,22 @@ resource "digitalocean_droplet" "relay1" {
   image    = "docker"
   name     = "relay1"
   region   = "${var.region}"
-  size     = "s-2vcpu-4gb"
+  size     = "s-4vcpu-8gb"
   ssh_keys = ["${digitalocean_ssh_key.default.id}"]
   tags     = ["${digitalocean_tag.relay.id}"]
   volume_ids = ["${digitalocean_volume.relay1.id}"]
+
+  provisioner "file" {
+    source = "../bootnode"
+    destination = "/root/bootnode"
+
+    connection = {
+      type        = "ssh"
+      user        = "root"
+      private_key = "${file("${var.private_key_path}")}"
+      agent       = false
+    }
+  }
 
   provisioner "file" {
     source = "../relay1"
@@ -237,7 +249,11 @@ resource "digitalocean_droplet" "relay1" {
 
   provisioner "remote-exec" {
     inline = [
+      "curl -L https://github.com/docker/compose/releases/download/1.18.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose",
+      "chmod +x /usr/local/bin/docker-compose",
+      "chmod +x /root/docker/setup_relay.sh",
       "docker pull ethereum/client-go",
+      "docker pull ubuntu:xenial",
       "git clone https://github.com/polyswarm/relay.git"
     ]
 
@@ -261,10 +277,22 @@ resource "digitalocean_droplet" "relay2" {
   image    = "docker"
   name     = "relay1"
   region   = "${var.region}"
-  size     = "s-2vcpu-4gb"
+  size     = "s-4vcpu-8gb"
   ssh_keys = ["${digitalocean_ssh_key.default.id}"]
   tags     = ["${digitalocean_tag.relay.id}"]
   volume_ids = ["${digitalocean_volume.relay2.id}"]
+
+  provisioner "file" {
+    source = "../bootnode"
+    destination = "/root/bootnode"
+
+    connection = {
+      type        = "ssh"
+      user        = "root"
+      private_key = "${file("${var.private_key_path}")}"
+      agent       = false
+    }
+  }
 
   provisioner "file" {
     source = "../relay2"
@@ -292,7 +320,11 @@ resource "digitalocean_droplet" "relay2" {
 
   provisioner "remote-exec" {
     inline = [
+      "curl -L https://github.com/docker/compose/releases/download/1.18.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose",
+      "chmod +x /usr/local/bin/docker-compose",
+      "chmod +x /root/docker/setup_relay.sh",
       "docker pull ethereum/client-go",
+      "docker pull ubuntu:xenial",
       "git clone https://github.com/polyswarm/relay.git"
     ]
 
@@ -316,7 +348,7 @@ resource "digitalocean_droplet" "relay3" {
   image    = "docker"
   name     = "relay3"
   region   = "${var.region}"
-  size     = "s-2vcpu-4gb"
+  size     = "s-4vcpu-8gb"
   ssh_keys = ["${digitalocean_ssh_key.default.id}"]
   tags     = ["${digitalocean_tag.relay.id}"]
   volume_ids = ["${digitalocean_volume.relay3.id}"]
@@ -359,7 +391,11 @@ resource "digitalocean_droplet" "relay3" {
 
   provisioner "remote-exec" {
     inline = [
+      "curl -L https://github.com/docker/compose/releases/download/1.18.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose",
+      "chmod +x /usr/local/bin/docker-compose",
+      "chmod +x /root/docker/setup_relay.sh",
       "docker pull ethereum/client-go",
+      "docker pull ubuntu:xenial",
       "git clone https://github.com/polyswarm/relay.git"
     ]
 
