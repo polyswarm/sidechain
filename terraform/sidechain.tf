@@ -234,6 +234,20 @@ resource "digitalocean_droplet" "relay1" {
       agent       = false
     }
   }
+
+  provisioner "remote-exec" {
+    inline = [
+      "docker pull ethereum/client-go",
+      "git clone https://github.com/polyswarm/relay.git"
+    ]
+
+    connection = {
+      type        = "ssh"
+      user        = "root"
+      private_key = "${file("${var.private_key_path}")}"
+      agent       = false
+    }
+  }
 }
 
 resource "digitalocean_volume" "relay2" {
@@ -267,6 +281,20 @@ resource "digitalocean_droplet" "relay2" {
   provisioner "file" {
     source = "../relay_docker"
     destination = "/root/docker"
+
+    connection = {
+      type        = "ssh"
+      user        = "root"
+      private_key = "${file("${var.private_key_path}")}"
+      agent       = false
+    }
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "docker pull ethereum/client-go",
+      "git clone https://github.com/polyswarm/relay.git"
+    ]
 
     connection = {
       type        = "ssh"
@@ -320,6 +348,20 @@ resource "digitalocean_droplet" "relay3" {
   provisioner "file" {
     source = "../relay_docker"
     destination = "/root/docker"
+
+    connection = {
+      type        = "ssh"
+      user        = "root"
+      private_key = "${file("${var.private_key_path}")}"
+      agent       = false
+    }
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "docker pull ethereum/client-go",
+      "git clone https://github.com/polyswarm/relay.git"
+    ]
 
     connection = {
       type        = "ssh"
