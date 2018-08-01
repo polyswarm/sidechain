@@ -10,8 +10,8 @@ resource "digitalocean_tag" "sidechain" {
   name = "sidechain"
 }
 
-resource "digitalocean_tag" "relays" {
-  name = "relays"
+resource "digitalocean_tag" "relay" {
+  name = "relay"
 }
 
 resource "digitalocean_ssh_key" "default" {
@@ -195,6 +195,140 @@ resource "digitalocean_droplet" "sealer3" {
   }
 }
 
+resource "digitalocean_volume" "relay1" {
+  region      = "${var.region}"
+  name        = "relay1"
+  size        = 300
+  description = "Holds the geth data"
+}
+
+resource "digitalocean_droplet" "relay1" {
+  image    = "docker"
+  name     = "relay1"
+  region   = "${var.region}"
+  size     = "s-2vcpu-4gb"
+  ssh_keys = ["${digitalocean_ssh_key.default.id}"]
+  tags     = ["${digitalocean_tag.relay.id}"]
+  volume_ids = ["${digitalocean_volume.relay1.id}"]
+
+  provisioner "file" {
+    source = "../relay1"
+    destination = "/root/keystore"
+
+    connection = {
+      type        = "ssh"
+      user        = "root"
+      private_key = "${file("${var.private_key_path}")}"
+      agent       = false
+    }
+  }
+
+  provisioner "file" {
+    source = "../relay_docker"
+    destination = "/root/docker"
+
+    connection = {
+      type        = "ssh"
+      user        = "root"
+      private_key = "${file("${var.private_key_path}")}"
+      agent       = false
+    }
+  }
+}
+
+resource "digitalocean_volume" "relay2" {
+  region      = "${var.region}"
+  name        = "relay2"
+  size        = 300
+  description = "Holds the geth data"
+}
+
+resource "digitalocean_droplet" "relay2" {
+  image    = "docker"
+  name     = "relay1"
+  region   = "${var.region}"
+  size     = "s-2vcpu-4gb"
+  ssh_keys = ["${digitalocean_ssh_key.default.id}"]
+  tags     = ["${digitalocean_tag.relay.id}"]
+  volume_ids = ["${digitalocean_volume.relay2.id}"]
+
+  provisioner "file" {
+    source = "../relay2"
+    destination = "/root/keystore"
+
+    connection = {
+      type        = "ssh"
+      user        = "root"
+      private_key = "${file("${var.private_key_path}")}"
+      agent       = false
+    }
+  }
+
+  provisioner "file" {
+    source = "../relay_docker"
+    destination = "/root/docker"
+
+    connection = {
+      type        = "ssh"
+      user        = "root"
+      private_key = "${file("${var.private_key_path}")}"
+      agent       = false
+    }
+  }
+}
+
+resource "digitalocean_volume" "relay3" {
+  region      = "${var.region}"
+  name        = "relay3"
+  size        = 300
+  description = "Holds the geth data"
+}
+
+resource "digitalocean_droplet" "relay3" {
+  image    = "docker"
+  name     = "relay3"
+  region   = "${var.region}"
+  size     = "s-2vcpu-4gb"
+  ssh_keys = ["${digitalocean_ssh_key.default.id}"]
+  tags     = ["${digitalocean_tag.relay.id}"]
+  volume_ids = ["${digitalocean_volume.relay3.id}"]
+
+  provisioner "file" {
+    source = "../bootnode"
+    destination = "/root/bootnode"
+
+    connection = {
+      type        = "ssh"
+      user        = "root"
+      private_key = "${file("${var.private_key_path}")}"
+      agent       = false
+    }
+  }
+
+  provisioner "file" {
+    source = "../relay3"
+    destination = "/root/keystore"
+
+    connection = {
+      type        = "ssh"
+      user        = "root"
+      private_key = "${file("${var.private_key_path}")}"
+      agent       = false
+    }
+  }
+
+  provisioner "file" {
+    source = "../relay_docker"
+    destination = "/root/docker"
+
+    connection = {
+      type        = "ssh"
+      user        = "root"
+      private_key = "${file("${var.private_key_path}")}"
+      agent       = false
+    }
+  }
+}
 # TODO: a single droplet for everything but the SSH hop. we should decompose this.
 # resource "digitalocean_droplet" "relay-1" {
 #   image    = "docker"
@@ -349,4 +483,16 @@ resource "digitalocean_record" "bootnode" {
 
 output "ip-bootnode" {
   value = "${digitalocean_droplet.bootnode.ipv4_address}"
+}
+
+output "ip-relay1" {
+  value = "${digitalocean_droplet.relay1.ipv4_address}"
+}
+
+output "ip-relay2" {
+  value = "${digitalocean_droplet.relay2.ipv4_address}"
+}
+
+output "ip-relay3" {
+  value = "${digitalocean_droplet.relay3.ipv4_address}"
 }
