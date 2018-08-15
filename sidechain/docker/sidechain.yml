@@ -1,0 +1,10 @@
+version: '3'
+services:
+    sidechain-sealer:
+        build:
+            context: /root/sidechain
+            dockerfile: /root/sidechain/docker/Dockerfile
+        image: polyswarm/sealer
+        command: ["--bootnodes", "enode://${ENODE}@${ENODE_IP}:30301", "--syncmode", "full", "--networkid", "31337", "--gasprice", "0", "--targetgaslimit", "94000000", "--etherbase", "${ADDRESS}", "--unlock", "${ADDRESS}", "--password", "password.txt", "--mine"]
+        ports:
+            - 30303:30303

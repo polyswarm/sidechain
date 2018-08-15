@@ -1,0 +1,13 @@
+[relay]
+    anchor_frequency = 100
+    confirmations = 20
+
+[relay.homechain]
+    ws-uri = "ws://homechain:8546"
+    token = ""
+    relay = ""
+
+[relay.sidechain]
+    ws-uri = "ws://sidechain:8546"
+    token = ""
+    relay = ""

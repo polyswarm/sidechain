@@ -1,0 +1,33 @@
+version: '3'
+services:
+    relay:
+        build:
+            context: /root/relay
+            dockerfile: /root/relay/docker/Dockerfile
+        depends_on:
+            - homechain
+            - sidechain
+        environment:
+            - RELAY_ACCOUNT=${ADDRESS}
+            - RELAY_PASSWORD=IsetupThisR3layTobedoingtHings
+            - RUST_LOG=polyswarm_relay=trace
+    sidechain:
+        image: ethereum/client-go
+        command: ["--bootnodes", "enode://${ENODE}@${ENODE_IP}:30301", "--syncmode", "full", "--networkid", "31337", "--rpc", "--rpcaddr", "0.0.0.0", "--rpcvhosts", "localhost,sidechain", "--rpcapi", "eth,web3,personal,net", "--ws", "--wsaddr", "0.0.0.0", "--wsapi", "eth,web3,personal,net", "--wsorigins", "*",]
+        volumes:
+            - "keystore:/root/.ethereum/keystore"
+        ports:
+            - 7545:8545
+    homechain:
+        image: ethereum/client-go
+        command: ["--syncmode", "full", "--networkid", "1", "--rpc", "--rpcaddr", "0.0.0.0", "--rpcvhosts", "localhost,homechain", "--rpcapi", "eth,web3,personal,net", "--ws", "--wsaddr", "0.0.0.0", "--wsapi", "eth,web3,personal,net", "--wsorigins", "*",]
+        volumes:
+            - "keystore:/root/.ethereum/keystore"
+        ports:
+            - 8545:8545
+volumes:
+    keystore:
+        driver_opts:
+                type: none
+                device: /root/keystore
+                o: bind
